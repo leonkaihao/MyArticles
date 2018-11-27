@@ -6,3 +6,5 @@ import:
   version: ^3.3.2
   subpackages:
   - rest
+- package: github.com/jmoiron/sqlx
+  version: ^1.2.0

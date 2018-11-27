@@ -6,7 +6,7 @@ import (
 
 	"github.com/ant0ine/go-json-rest/rest"
 	"github.com/leonkaihao/myarticles/handler/http/articles"
-	"github.com/leonkaihao/myarticles/services/db"
+	"github.com/leonkaihao/myarticles/services/database"
 )
 
 //AppServer todo
@@ -15,12 +15,17 @@ type AppServer struct {
 
 //Serve todo
 func (appSvr *AppServer) Serve() error {
-	err := db.Initialize()
+	db := &database.Database{}
+	err := db.Open("./service.db")
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
-	artObj := new(articles.Articles)
+	defer db.Close()
+
+	artObj := &articles.Articles{
+		DB: db,
+	}
 	api := rest.NewApi()
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
