@@ -2,3 +2,7 @@ package: .
 import:
 - package: github.com/mattn/go-sqlite3
   version: ^1.10.0
+- package: github.com/ant0ine/go-json-rest
+  version: ^3.3.2
+  subpackages:
+  - rest
