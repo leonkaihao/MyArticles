@@ -2,7 +2,8 @@ package database
 
 import (
 	"errors"
-	"log"
+
+	"github.com/jmoiron/sqlx"
 )
 
 //CreateArticle ...
@@ -35,7 +36,7 @@ func (db *Database) CreateArticle(article *ArticleRequest) (err error) {
 		return
 	}
 	//first insert to articles table
-	itemArticle := &articleDAO{
+	itemArticle := &ArticleDAO{
 		Title: article.Title,
 		Date:  article.Date,
 		Body:  article.Body,
@@ -43,26 +44,78 @@ func (db *Database) CreateArticle(article *ArticleRequest) (err error) {
 	schemaArticle := "insert into articles(title, date, body) values(:title, :date, :body)"
 	res, err := db.DB.NamedExec(schemaArticle, itemArticle)
 	if err != nil {
-		log.Fatalln("db.CreateArticle:", err)
+		return
 	}
 	//get the inserted item id
 	articleID, err := res.LastInsertId()
 	if err != nil {
-		log.Fatalln("db.CreateArticle:", err)
+		return
 	}
 	//and then insert all tags to articleTag table
 	schemaArticleTag := "insert into articleTag(article_id, tag_name) values(:article_id, :tag_name)"
 	for _, tag := range article.Tags {
-		itemArticleTag := &articleTagDAO{
+		itemArticleTag := &ArticleTagDAO{
 			ArticleID: articleID,
 			TagName:   tag,
 		}
-		_, err := db.DB.NamedExec(schemaArticleTag, itemArticleTag)
+		_, err = db.DB.NamedExec(schemaArticleTag, itemArticleTag)
 
 		if err != nil {
-			log.Fatalln("db.CreateArticle:", err)
+			return
 		}
 	}
 
+	return
+}
+
+//GetArticleByID get a article by its id
+func (db *Database) GetArticleByID(id int64) (resp *ArticleResponse, err error) {
+
+	schemaArticle := "SELECT * FROM articles WHERE id=?"
+	article := &ArticleDAO{}
+	err = db.DB.Get(article, schemaArticle, id)
+	if err != nil {
+		return
+	}
+	resp = &ArticleResponse{
+		ID:    article.ID,
+		Title: article.Title,
+		Body:  article.Body,
+		Date:  article.Date,
+	}
+	schemaTags := "SELECT DISTINCT tag_name FROM articleTag WHERE article_id=?"
+	err = db.DB.Select(&resp.Tags, schemaTags, id)
+	if err != nil {
+		return
+	}
+
+	return
+}
+
+//GetArticlesByTagDate get collect info by tag and date
+func (db *Database) GetArticlesByTagDate(tagName string, date string) (resp *TagDateResponse, err error) {
+	//get article IDs
+	schemaArticleID := "SELECT articles.id FROM articles, articleTag WHERE articles.id=articleTag.article_id AND articleTag.tag_name=? AND articles.date=?"
+	resp = &TagDateResponse{
+		TagName: tagName,
+	}
+	err = db.DB.Select(&resp.Articles, schemaArticleID, tagName, date)
+	if err != nil {
+		return
+	}
+
+	resp.Count = int64(len(resp.Articles))
+	//get tags
+	schemaTagsID := "SELECT DISTINCT tag_name FROM articleTag WHERE article_id IN (?)"
+	query, args, err := sqlx.In(schemaTagsID, resp.Articles)
+	if err != nil {
+		return
+	}
+	query = db.DB.Rebind(query)
+
+	err = db.DB.Select(&resp.RelatedTags, query, args...)
+	if err != nil {
+		return
+	}
 	return
 }

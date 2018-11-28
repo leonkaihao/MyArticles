@@ -11,6 +11,6 @@ func main() {
 	appServer := new(server.AppServer)
 	err := appServer.Serve()
 	if err != nil {
-		log.Fatal("Failed to start APP Server:", err)
+		log.Fatalln("Failed to start APP Server:", err)
 	}
 }

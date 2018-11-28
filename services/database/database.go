@@ -42,9 +42,9 @@ func (db *Database) createArticleTable() (err error) {
 	sqlTable := `
 	CREATE TABLE IF NOT EXISTS articles(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        title VARCHAR(256) NULL,
-        body VARCHAR(4096) NULL,
-        date VARCHAR(16) NULL
+        title VARCHAR(256) NOT NULL,
+        body VARCHAR(4096) NOT NULL,
+        date VARCHAR(16) NOT NULL
     );
 	`
 	_, err = db.DB.Exec(sqlTable)
@@ -55,8 +55,8 @@ func (db *Database) createArticleTagTable() (err error) {
 	sqlTable := `
 	CREATE TABLE IF NOT EXISTS articleTag(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        article_id INTEGER NULL,
-        tag_name VARCHAR(64) NULL
+        article_id INTEGER NOT NULL,
+        tag_name VARCHAR(64) NOT NULL
     );
 	`
 	_, err = db.DB.Exec(sqlTable)
@@ -68,7 +68,7 @@ func (db *Database) createTagTable() (err error) {
 	sqlTable := `
 	CREATE TABLE IF NOT EXISTS tags(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name VARCHAR(64) NULL
+		name VARCHAR(64) NOT NULL
 	);
 	`
 	_, err = db.DB.Exec(sqlTable)

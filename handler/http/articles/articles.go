@@ -2,6 +2,7 @@ package articles
 
 import (
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -25,7 +26,7 @@ func (art *Articles) Create(w rest.ResponseWriter, r *rest.Request) {
 	}
 
 	//ignore data Date field from client, and generate time from server
-	data.Date = time.Now().Format("2016-09-22")
+	data.Date = time.Now().Format("2006-01-02")
 	//protect a transaction
 	art.Lock()
 	defer art.Unlock()
@@ -42,13 +43,36 @@ func (art *Articles) Create(w rest.ResponseWriter, r *rest.Request) {
 //ArticleByID Get one article by its id
 //get an article by id
 func (art *Articles) ArticleByID(w rest.ResponseWriter, r *rest.Request) {
-	rest.Error(w, "not implement", http.StatusBadRequest)
+	idStr := r.PathParam("id")
+
+	id64, err := strconv.ParseInt(idStr, 10, 64)
+	if err != nil {
+		rest.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	resp, err := art.DB.GetArticleByID(id64)
+	if err != nil {
+		rest.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	w.WriteJson(resp)
 	return
 }
 
 //ArticlesByTagDate Get articles by a tag and date
 //get artcles by tags and date range
 func (art *Articles) ArticlesByTagDate(w rest.ResponseWriter, r *rest.Request) {
-	rest.Error(w, "not implement", http.StatusBadRequest)
+	tagName := r.PathParam("tagName")
+	date := r.PathParam("date")
+
+	resp, err := art.DB.GetArticlesByTagDate(tagName, date)
+	if err != nil {
+		rest.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.WriteJson(resp)
 	return
 }

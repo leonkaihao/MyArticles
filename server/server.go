@@ -18,7 +18,7 @@ func (appSvr *AppServer) Serve() error {
 	db := &database.Database{}
 	err := db.Open("./service.db")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 		return err
 	}
 	defer db.Close()
@@ -34,12 +34,12 @@ func (appSvr *AppServer) Serve() error {
 		rest.Get("/tags/:tagName/:date", artObj.ArticlesByTagDate),
 	)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 		return err
 	}
 	api.SetApp(router)
 	addr := ":3000"
 	log.Println("Start server", addr, "...")
-	log.Fatal(http.ListenAndServe(addr, api.MakeHandler()))
+	log.Fatalln(http.ListenAndServe(addr, api.MakeHandler()))
 	return err
 }
