@@ -105,6 +105,11 @@ func (db *Database) GetArticlesByTagDate(tagName string, date string) (resp *Tag
 	}
 
 	resp.Count = int64(len(resp.Articles))
+	if resp.Count == 0 {
+		err = errors.New("No article match this tag/date")
+		resp = nil
+		return
+	}
 	//get tags
 	schemaTagsID := "SELECT DISTINCT tag_name FROM articleTag WHERE article_id IN (?)"
 	query, args, err := sqlx.In(schemaTagsID, resp.Articles)

@@ -64,6 +64,19 @@ func TestDatabase_CreateArticle(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "normal format",
+			db:   db,
+			args: args{
+				article: &ArticleRequest{
+					Title: "title",
+					Date:  "Date",
+					Body:  "Body",
+					Tags:  []string{"science"},
+				},
+			},
+			wantErr: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -108,6 +121,14 @@ func TestDatabase_GetArticleByID(t *testing.T) {
 			},
 			wantErr: false,
 		},
+		{
+			name: "get second item",
+			db:   db,
+			args: args{
+				id: 2,
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -148,7 +169,7 @@ func TestDatabase_GetArticlesByTagDate(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name: "tag date select",
+			name: "tag date select 2 items",
 			db:   db,
 			args: args{
 				tagName: "science",
@@ -164,6 +185,44 @@ func TestDatabase_GetArticlesByTagDate(t *testing.T) {
 					"science", "medical", "fitness",
 				},
 			},
+			wantErr: false,
+		},
+		{
+			name: "tag date select 1 items",
+			db:   db,
+			args: args{
+				tagName: "sport",
+				date:    time.Now().Format("2006-01-02"),
+			},
+			wantResp: &TagDateResponse{
+				TagName: "sport",
+				Count:   1,
+				Articles: []string{
+					"3",
+				},
+				RelatedTags: []string{
+					"fitness", "sport",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "tag not exist",
+			db:   db,
+			args: args{
+				tagName: "child",
+				date:    time.Now().Format("2006-01-02"),
+			},
+			wantErr: true,
+		},
+		{
+			name: "date not exist",
+			db:   db,
+			args: args{
+				tagName: "science",
+				date:    "2006-01-02",
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
