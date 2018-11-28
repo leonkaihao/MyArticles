@@ -1,6 +1,8 @@
 package database
 
-import "github.com/jmoiron/sqlx"
+import (
+	"github.com/jmoiron/sqlx"
+)
 
 //Database to identify a database source
 type Database struct {

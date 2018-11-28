@@ -44,7 +44,7 @@ func (db *Database) createArticleTable() (err error) {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title VARCHAR(256) NULL,
         body VARCHAR(4096) NULL,
-        date DATE NULL
+        date VARCHAR(16) NULL
     );
 	`
 	_, err = db.DB.Exec(sqlTable)
