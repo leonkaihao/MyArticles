@@ -30,7 +30,10 @@ func (appSvr *AppServer) Serve() error {
 	api.Use(rest.DefaultDevStack...)
 	router, err := rest.MakeRouter(
 		rest.Post("/articles", artObj.Create),
+		rest.Get("/articles", artObj.Articles), //for getting conditioned articles
 		rest.Get("/articles/:id", artObj.ArticleByID),
+		rest.Post("/articles/:id", artObj.UpdateArticleByID),   //update an article by id
+		rest.Delete("/articles/:id", artObj.DeleteArticleByID), //delete an article with its tags
 		rest.Get("/tags/:tagName/:date", artObj.ArticlesByTagDate),
 	)
 	if err != nil {
@@ -38,7 +41,7 @@ func (appSvr *AppServer) Serve() error {
 		return err
 	}
 	api.SetApp(router)
-	addr := ":3000"
+	addr := ":8080"
 	log.Println("Start server", addr, "...")
 	log.Fatalln(http.ListenAndServe(addr, api.MakeHandler()))
 	return err

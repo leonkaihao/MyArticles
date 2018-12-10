@@ -238,3 +238,33 @@ func TestDatabase_GetArticlesByTagDate(t *testing.T) {
 		})
 	}
 }
+
+func TestDatabase_UpdateArticle(t *testing.T) {
+
+	os.Remove("./test.db")
+	db := &Database{}
+	db.Open("./test.db")
+	defer db.Close()
+	req := &ArticleRequest{Title: "title1", Body: "body", Date: time.Now().Format("2006-01-02"), Tags: []string{"science", "medical"}}
+	db.CreateArticle(req)
+
+	type args struct {
+		id      int64
+		article *ArticleRequest
+	}
+	tests := []struct {
+		name    string
+		db      *Database
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := tt.db.UpdateArticle(tt.args.id, tt.args.article); (err != nil) != tt.wantErr {
+				t.Errorf("Database.UpdateArticle() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
